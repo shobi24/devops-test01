@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  go-app:
+    build: ./app
+    container_name: go-app
+    ports:
+      - "${GO_APP_PORT}:8080"
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert.rules.yml:/etc/prometheus
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    depends_on:
+      - go-app
+
+  grafana:
+  image: grafana/grafana
+  container_name: grafana
+  environment:
+    - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+    - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+  ports:
+    - "${GRAFANA_PORT}:3000"
+  volumes:
+    - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    - ./grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+  depends_on:
+    - prometheus
+    
+  alertmanager:
+  image: prom/alertmanager
+  container_name: alertmanager
+  volumes:
+    - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+  ports:
+    - "9093:9093"
+    
+  depends_on:
+    - go-app
+    - alertmanager
+
