@@ -40,6 +40,6 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            git clone https://github.com/yourrepo/go-monitoring-stack.git
-            cd go-monitoring-stack
+            git clone https://github.com/shobi24/devops-test01.git
+            #cd go-monitoring-stack
             docker compose up -d --build
